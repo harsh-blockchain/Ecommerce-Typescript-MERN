@@ -2,6 +2,8 @@ import express from "express";
 const Product = require("../models/productModel");
 import ErrorHandler from "../utils/errorHandler";
 const catchAsyncErrors = require("../middleware/catchAsyncError");
+import apiFeatures from "../utils/apiFeatures";
+import mongoose from "mongoose";
 
 /* create Product */
 
@@ -23,10 +25,19 @@ export const createProduct = catchAsyncErrors(
 
 export const getAllProducts = catchAsyncErrors(
   async (req: express.Request, res: express.Response) => {
-    const products = await Product.find();
+    const resPerPage: number = 6;
+    const productCount = await Product.countDocuments();
+    const query: mongoose.Query<any, {}> = Product.find();
+    const queryString: any = req.query;
+    const apiFeature = new apiFeatures(query, queryString);
+
+    let products = await apiFeature.filter().search().pagination(resPerPage)
+      .query;
+
     res.status(200).json({
       success: true,
       products,
+      productCount,
     });
   }
 );
