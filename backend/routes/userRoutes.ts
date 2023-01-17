@@ -1,4 +1,4 @@
-import { forgotPassword } from "./../controllers/userController";
+import { forgotPassword, resetPassword } from "./../controllers/userController";
 const user_express = require("express");
 const env = require("dotenv");
 import { isAuthenticated } from "../middleware/auth";
@@ -19,5 +19,6 @@ user_Router.route("/users/login").post(loginUser);
 user_Router.route("/users/logout").get(isAuthenticated, logoutUser);
 
 user_Router.route("/password/forgot").post(forgotPassword);
+user_Router.route("/password/reset/:token").put(resetPassword);
 
 module.exports = user_Router;

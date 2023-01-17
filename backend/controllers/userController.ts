@@ -4,6 +4,7 @@ import { sendToken } from "../utils/sendToken";
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/userModel");
 import ErrorHandler from "../utils/errorHandler";
+const crypto = require("crypto");
 
 /* Register user */
 export const registerUser = catchAsyncErrors(
@@ -131,5 +132,48 @@ export const forgotPassword = catchAsyncErrors(
 
       return next(new ErrorHandler(error.message, 500));
     }
+  }
+);
+
+/* Reset Password */
+
+export const resetPassword = catchAsyncErrors(
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    // Hash URL token
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(
+        new ErrorHandler(
+          "Password reset token is invalid or has been expired",
+          400
+        )
+      );
+    }
+
+    if (req.body.password !== req.body.confirmPassword) {
+      return next(new ErrorHandler("Password does not match", 400));
+    }
+
+    // Setup new password
+    user.password = req.body.password;
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    sendToken(res, 200, user);
   }
 );
