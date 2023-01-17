@@ -4,16 +4,22 @@ import ErrorHandler from "../utils/errorHandler";
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 import apiFeatures from "../utils/apiFeatures";
 import mongoose from "mongoose";
-import { isAuthenticated } from "../middleware/auth";
 
 /* create Product */
 
+interface IGetRoleRequest extends express.Request {
+  user: {
+    id: string;
+  };
+}
+
 export const createProduct = catchAsyncErrors(
   async (
-    req: express.Request,
+    req: IGetRoleRequest,
     res: express.Response,
     next: express.NextFunction
   ) => {
+    req.body.user = req.user.id;
     const product = await Product.create(req.body);
     res.status(201).json({
       success: true,

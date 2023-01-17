@@ -1,6 +1,7 @@
 const user_express = require("express");
 const env = require("dotenv");
 import { isAuthenticated } from "../middleware/auth";
+import { authorizeRoles } from "../middleware/auth";
 
 env.config({ path: "backend/config/config.env" });
 

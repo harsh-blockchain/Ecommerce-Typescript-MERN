@@ -29,3 +29,29 @@ export const isAuthenticated = catchAsyncErrors(
     next();
   }
 );
+
+/* now setting req.user.role typescript interface */
+
+interface IGetRoleRequest extends express.Request {
+  user: {
+    role: string;
+  };
+}
+
+export const authorizeRoles = (...roles: string[]) => {
+  return (
+    req: IGetRoleRequest,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          `Role ${req.user.role} is not allowed to access this resource`,
+          403
+        )
+      );
+    }
+    next();
+  };
+};
