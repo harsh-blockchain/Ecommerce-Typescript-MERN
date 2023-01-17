@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const validator = require("validator");
 import express from "express";
 const dotenv = require("dotenv");
+const crypto = require("crypto");
 
 dotenv.config({ path: "backend/config/config.env" });
 
@@ -64,6 +65,24 @@ userSchema.methods.getJwtToken = function () {
 
 userSchema.methods.comparePassword = async function (password: string) {
   return await bcrypt.compare(password, this.password);
+};
+
+/* Generate password reset token */
+
+userSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Set token expire time
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = user_mongoose.model("User", userSchema);
