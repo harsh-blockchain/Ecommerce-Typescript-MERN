@@ -4,6 +4,7 @@ import ErrorHandler from "../utils/errorHandler";
 const catchAsyncErrors = require("../middleware/catchAsyncError");
 import apiFeatures from "../utils/apiFeatures";
 import mongoose from "mongoose";
+import { isAuthenticated } from "../middleware/auth";
 
 /* create Product */
 
